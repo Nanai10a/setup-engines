@@ -5,6 +5,7 @@ runs:
   using: "composite"
   steps:
     - name: setup corepack
+      shell: bash
       run: |
         export VERSION=$(curl -s https://nodejs.org/download/nightly/index.json | jq -c '.[0].version' | sed 's/"//g')
         curl https://nodejs.org/download/nightly/$VERSION/node-$VERSION-linux-x64.tar.xz -so- | tar -xJC /tmp node-$VERSION-linux-x64/{bin,lib}
@@ -13,9 +14,11 @@ runs:
         export NCOREPACK=/tmp/nnode/bin/corepack
 
     - id: json
+      shell: bash
       run: echo "txt=$(cat package.json | jq -c '.engines')" >> $GITHUB_OUTPUT
 
     - id: engines
+      shell: bash
       run: |
         echo "node=${{ fromJSON(steps.json.outputs.txt).node }}" >> $GITHUB_OUTPUT
         echo "yarn=${{ fromJSON(steps.json.outputs.txt).yarn }}" >> $GITHUB_OUTPUT
@@ -29,8 +32,10 @@ runs:
 
     - name: setup yarn
       if: steps.engines.outputs.yarn != ''
+      shell: bash
       run: $NCOREPACK prepare yarn@${{ steps.engines.outputs.yarn }} --activate
 
     - name: setup pnpm
       if: steps.engines.outputs.pnpm != ''
+      shell: bash
       run: $NCOREPACK prepare pnpm@${{ steps.engines.outputs.pnpm }} --activate
